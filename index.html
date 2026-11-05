@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>kgb</title>
+    
+<script type="module">
+import init, * as bindings from '/kgb-play/kgb-d2c10129654726ab.js';
+const wasm = await init({ module_or_path: '/kgb-play/kgb-a84a589ff6cd9a5c_bg.wasm' });
+
+
+window.wasmBindings = bindings;
+
+
+dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
+
+</script>
+    
+    
+    
+    
+    
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <meta name="theme-color" content="#111111" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <style>
+      :root {
+        --bg: #111;
+        --panel: #1b1b1f;
+        --text: #e6e6e6;
+        --muted: #9a9aa4;
+        --line: #33333a;
+        --accent: #6aa9ff;
+        --info: #9ad1a0;
+        --warning: #e8c46a;
+        --error: #ff8a8a;
+        /* The running screen's size; the app sets these with --screen-ar. */
+        --screen-w: 640;
+        --screen-h: 576;
+      }
+      html, body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, sans-serif; }
+      #app { display: flex; min-height: 100vh; position: relative; }
+      #screen { flex: 1; display: flex; justify-content: center; align-items: center; min-width: 0; }
+      canvas { width: 640px; height: 576px; max-width: 100%; height: auto !important; aspect-ratio: var(--screen-ar, 10 / 9); flex: none; image-rendering: pixelated; outline: none; }
+
+      #drawer { position: relative; width: 280px; flex: none; background: var(--panel); border-right: 1px solid var(--line); z-index: 2; }
+      #drawer.collapsed { width: 0; border-right: 0; }
+      #drawer-body { box-sizing: border-box; width: 280px; height: 100%; padding: 12px; overflow-y: auto; overflow-x: hidden; }
+      #drawer.collapsed #drawer-body { visibility: hidden; }
+      #drawer-tab { position: absolute; top: 12px; left: 100%; width: 28px; height: 44px; padding: 0; border: 1px solid var(--line); border-left: 0; border-radius: 0 6px 6px 0; background: var(--panel); color: var(--text); font-size: 18px; cursor: pointer; }
+      #drawer h2 { margin: 16px 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+      #drawer h2:first-child { margin-top: 0; }
+      #drawer #option-list h2:first-child { margin-top: 16px; }
+      #drawer ul { list-style: none; margin: 0 0 8px; padding: 0; }
+      #drawer li { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+      #drawer li label, #drawer li .recent-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      #drawer li .recent-name { text-align: left; }
+      #drawer button, #drawer select { font: inherit; color: var(--text); background: #26262c; border: 1px solid var(--line); border-radius: 4px; padding: 3px 8px; }
+      #drawer button { cursor: pointer; }
+      #drawer button:disabled, #drawer select:disabled { opacity: .5; cursor: default; }
+      #drawer select { width: 100%; box-sizing: border-box; }
+      #drawer .empty { color: var(--muted); }
+      #boot-slots { margin-top: 6px; }
+      #boot-slots p { margin: 0 0 4px; }
+      #boot-slots-choices { display: flex; flex-wrap: wrap; gap: 4px; }
+      #diag { margin-top: 10px; font-size: 12px; opacity: 0.7; font-variant-numeric: tabular-nums; }
+      #drawer-msg { margin-top: 14px; min-height: 1.4em; overflow-wrap: anywhere; }
+      #drawer-msg.info { color: var(--info); }
+      #drawer-msg.warning { color: var(--warning); }
+      #drawer-msg.error { color: var(--error); }
+      #drawer :focus-visible, #drawer-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+      .hidden { display: none; }
+
+      /* On-screen controls: touch screens only (the media query below). */
+      #touch, #menu-btn { display: none; }
+      #touch { position: fixed; inset: 0; z-index: 1; pointer-events: none; transition: opacity .25s; }
+      #touch, #touch > *, #menu-btn { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+      #touch.faded { opacity: 0; }
+      #touch > * { position: absolute; box-sizing: border-box; pointer-events: auto; display: flex; align-items: center; justify-content: center; color: rgba(255, 255, 255, .8); font: 600 15px/1 system-ui, sans-serif; }
+      #touch > .hidden { display: none; }
+      #dpad { width: var(--dpad); height: var(--dpad); }
+      #dpad::before, #dpad::after { content: ""; position: absolute; background: rgba(255, 255, 255, .14); border: 2px solid rgba(255, 255, 255, .32); border-radius: 8px; }
+      #dpad::before { left: 0; right: 0; top: 33%; bottom: 33%; }
+      #dpad::after { top: 0; bottom: 0; left: 33%; right: 33%; }
+      #btn-a, #btn-b { width: var(--ab); height: var(--ab); border-radius: 50%; background: rgba(255, 255, 255, .14); border: 2px solid rgba(255, 255, 255, .32); font-size: 20px; }
+      #btn-start, #btn-select { width: var(--pill-w); height: var(--pill-h); border-radius: 999px; background: rgba(255, 255, 255, .1); border: 2px solid rgba(255, 255, 255, .25); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+      #menu-btn { position: fixed; z-index: 4; width: 44px; height: 44px; padding: 0; border: 2px solid rgba(255, 255, 255, .3); border-radius: 10px; background: rgba(27, 27, 31, .7); color: var(--text); font-size: 22px; line-height: 1; }
+
+      @media (pointer: coarse) {
+        :root {
+          --sat: env(safe-area-inset-top, 0px);
+          --sar: env(safe-area-inset-right, 0px);
+          --sab: env(safe-area-inset-bottom, 0px);
+          --sal: env(safe-area-inset-left, 0px);
+          --dpad: min(38vmin, 170px);
+          --ab: min(17vmin, 80px);
+          --pill-w: min(16vmin, 76px);
+          --pill-h: min(7vmin, 32px);
+        }
+        html, body { height: 100%; overflow: hidden; overscroll-behavior: none; touch-action: manipulation; }
+        #app { min-height: 0; height: 100dvh; }
+        #screen { position: absolute; inset: 0; box-sizing: border-box; padding: var(--sat) var(--sar) var(--sab) var(--sal); }
+        canvas { max-width: none; width: min(var(--avail-w), var(--avail-h) * var(--screen-w) / var(--screen-h)) !important; height: auto !important; }
+        /* A thumb straying onto the picture neither zooms the page nor selects. */
+        #screen, canvas { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+
+        /* The drawer overlays the game at every width; the menu button replaces its tab. */
+        #drawer { position: absolute; top: 0; left: 0; bottom: 0; height: auto; width: calc(280px + var(--sal)); z-index: 3; }
+        #drawer-body { width: calc(280px + var(--sal)); padding: calc(12px + var(--sat)) 12px calc(12px + var(--sab)) calc(12px + var(--sal)); box-shadow: 4px 0 16px rgba(0, 0, 0, .5); touch-action: pan-y; }
+        #drawer-tab { display: none; }
+        /* Finger-sized: 44 px targets, and 16 px text so iOS does not zoom a focused field. */
+        #drawer { font-size: 16px; }
+        #drawer button, #drawer select { min-height: 44px; padding: 6px 12px; font-size: 16px; }
+        #drawer li { padding: 4px 0; }
+        #drawer input[type="radio"] { width: 24px; height: 24px; margin: 10px; flex: none; }
+        #drawer input[type="file"], #drawer input[type="text"] { font-size: 16px; min-height: 44px; }
+        #drawer li label { padding: 10px 0; }
+        #drawer button + button { margin-top: 6px; }
+
+        #touch { display: block; }
+        #menu-btn { display: block; }
+      }
+
+      /* Portrait: the screen at the top, full width; the controls below it. */
+      @media (pointer: coarse) and (orientation: portrait) {
+        :root {
+          --avail-w: calc(100dvw - var(--sal) - var(--sar));
+          --avail-h: calc(56dvh - var(--sat));
+          --row: calc(var(--sab) + 13dvh);
+        }
+        #screen { align-items: flex-start; }
+        #dpad { left: calc(var(--sal) + 5vw); bottom: var(--row); }
+        #btn-a { right: calc(var(--sar) + 4vw); bottom: calc(var(--row) + var(--dpad) * .45); }
+        #btn-b { right: calc(var(--sar) + 4vw + var(--ab) * 1.15); bottom: calc(var(--row) + var(--dpad) * .1); }
+        #btn-select, #btn-start { left: 50%; bottom: calc(var(--sab) + 4dvh); }
+        #btn-select { transform: translateX(calc(-100% - 2vw)); }
+        #btn-start { transform: translateX(2vw); }
+        #menu-btn { right: calc(var(--sar) + 4vw); bottom: calc(var(--sab) + 3dvh); }
+      }
+
+      /* Landscape: the screen centred, as tall as fits; D-pad left, A and B right. */
+      @media (pointer: coarse) and (orientation: landscape) {
+        :root {
+          --side: min(44vmin, 200px);
+          --avail-w: calc(100dvw - var(--sal) - var(--sar) - 2 * var(--side));
+          --avail-h: calc(100dvh - var(--sat) - var(--sab));
+          --edge: 3vmin;
+        }
+        #screen { align-items: center; }
+        #dpad { left: calc(var(--sal) + var(--edge)); top: calc(50% - var(--dpad) / 2); }
+        #btn-a { right: calc(var(--sar) + var(--edge)); top: calc(50% - var(--ab)); }
+        #btn-b { right: calc(var(--sar) + var(--edge) + var(--ab) * 1.1); top: calc(50% - var(--ab) * .2); }
+        #btn-select { left: calc(var(--sal) + var(--edge)); bottom: calc(var(--sab) + var(--edge)); }
+        #btn-start { right: calc(var(--sar) + var(--edge)); bottom: calc(var(--sab) + var(--edge)); }
+        #menu-btn { right: calc(var(--sar) + var(--edge)); top: calc(var(--sat) + var(--edge)); }
+      }
+
+      @media (max-width: 960px) {
+        #drawer { position: absolute; top: 0; left: 0; bottom: 0; height: auto; }
+        #drawer-body { box-shadow: 4px 0 16px rgba(0, 0, 0, .5); }
+      }
+    </style>
+  <link rel="modulepreload" href="/kgb-play/kgb-d2c10129654726ab.js" crossorigin="anonymous" integrity="sha384-+hH1iwpO/0q3SpJ/8Iec46hHxv4okR1z1snaouX85iCAIy6ruZWW/xr87vLRUHwH"><link rel="preload" href="/kgb-play/kgb-a84a589ff6cd9a5c_bg.wasm" crossorigin="anonymous" integrity="sha384-F+iHLnALilkK05SktTmqI89bED8BbPa0fg9mSd7C+vW1QBS+RwGkqqeV5jmR+TNh" as="fetch" type="application/wasm"></head>
+  <body>
+    <div id="app">
+      <aside id="drawer" aria-label="Launcher">
+        <div id="drawer-body">
+          <h2>Boot ROM</h2>
+          <ul id="boot-list"></ul>
+          <button id="boot-add" type="button">Add boot ROM…</button>
+          <input id="boot-file" class="hidden" type="file" tabindex="-1" aria-label="Boot ROM file" />
+          <div id="boot-slots" class="hidden" role="group" aria-labelledby="boot-slots-q">
+            <p id="boot-slots-q"></p>
+            <div id="boot-slots-choices"></div>
+          </div>
+
+          <h2><label for="model-select">Model</label></h2>
+          <select id="model-select"></select>
+          <div id="option-list"></div>
+
+          <h2>Games</h2>
+          <button id="game-open" type="button">Open file…</button>
+          <input id="game-file" class="hidden" type="file" tabindex="-1" aria-label="Game file" />
+          <ul id="recent-list"></ul>
+          <button id="restart" type="button" disabled>Restart</button>
+
+          <h2>Battery save</h2>
+          <button id="save-export" type="button" disabled>Save .sav…</button>
+          <button id="save-import" type="button" disabled>Load .sav…</button>
+          <input id="save-file" class="hidden" type="file" tabindex="-1" aria-label="Save file" />
+
+          <h2>Save states</h2>
+          <button id="state-save" type="button" disabled>Quick Save (F5)</button>
+          <button id="state-load" type="button" disabled>Quick Load (F8)</button>
+          <ul id="state-list"></ul>
+          <h2><label for="speed-select">Speed</label></h2>
+          <select id="speed-select"></select>
+          <div id="phone-rumble-row" class="hidden">
+            <label><input id="phone-rumble" type="checkbox" checked /> Phone rumble</label>
+          </div>
+          <div id="diag" aria-label="Diagnostics"></div>
+
+          <div id="drawer-msg" role="status" aria-live="polite"></div>
+        </div>
+        <button id="drawer-tab" type="button" aria-expanded="true" aria-controls="drawer-body" aria-label="Launcher drawer">&#8249;</button>
+      </aside>
+      <div id="screen">
+        <canvas id="kgb" width="640" height="576"></canvas>
+      </div>
+      <div id="touch" aria-hidden="true">
+        <div id="dpad"></div>
+        <div id="btn-select"></div>
+        <div id="btn-start"></div>
+        <div id="btn-b"></div>
+        <div id="btn-a"></div>
+      </div>
+      <button id="menu-btn" type="button" aria-expanded="true" aria-controls="drawer-body" aria-label="Menu">&#9776;</button>
+    </div>
+  </body>
+</html>
