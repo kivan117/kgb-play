@@ -6,8 +6,8 @@
     <title>kgb</title>
     
 <script type="module">
-import init, * as bindings from '/kgb-play/kgb-d2c10129654726ab.js';
-const wasm = await init({ module_or_path: '/kgb-play/kgb-a84a589ff6cd9a5c_bg.wasm' });
+import init, * as bindings from '/kgb-play/kgb-9b97dd949d9eb102.js';
+const wasm = await init({ module_or_path: '/kgb-play/kgb-bcbc106f47c627a4_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -86,7 +86,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
       #dpad::before { left: 0; right: 0; top: 33%; bottom: 33%; }
       #dpad::after { top: 0; bottom: 0; left: 33%; right: 33%; }
       #btn-a, #btn-b { width: var(--ab); height: var(--ab); border-radius: 50%; background: rgba(255, 255, 255, .14); border: 2px solid rgba(255, 255, 255, .32); font-size: 20px; }
-      #btn-start, #btn-select { width: var(--pill-w); height: var(--pill-h); border-radius: 999px; background: rgba(255, 255, 255, .1); border: 2px solid rgba(255, 255, 255, .25); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+      #btn-start, #btn-select, #btn-rewind { width: var(--pill-w); height: var(--pill-h); border-radius: 999px; background: rgba(255, 255, 255, .1); border: 2px solid rgba(255, 255, 255, .25); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
       #menu-btn { position: fixed; z-index: 4; width: 44px; height: 44px; padding: 0; border: 2px solid rgba(255, 255, 255, .3); border-radius: 10px; background: rgba(27, 27, 31, .7); color: var(--text); font-size: 22px; line-height: 1; }
 
       @media (pointer: coarse) {
@@ -138,6 +138,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         #btn-select, #btn-start { left: 50%; bottom: calc(var(--sab) + 4dvh); }
         #btn-select { transform: translateX(calc(-100% - 2vw)); }
         #btn-start { transform: translateX(2vw); }
+        #btn-rewind { left: 50%; transform: translateX(-50%); bottom: calc(var(--row) + var(--dpad) + 2dvh); }
         #menu-btn { right: calc(var(--sar) + 4vw); bottom: calc(var(--sab) + 3dvh); }
       }
 
@@ -155,6 +156,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         #btn-b { right: calc(var(--sar) + var(--edge) + var(--ab) * 1.1); top: calc(50% - var(--ab) * .2); }
         #btn-select { left: calc(var(--sal) + var(--edge)); bottom: calc(var(--sab) + var(--edge)); }
         #btn-start { right: calc(var(--sar) + var(--edge)); bottom: calc(var(--sab) + var(--edge)); }
+        #btn-rewind { left: calc(var(--sal) + var(--edge)); top: calc(var(--sat) + var(--edge)); }
         #menu-btn { right: calc(var(--sar) + var(--edge)); top: calc(var(--sat) + var(--edge)); }
       }
 
@@ -163,7 +165,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         #drawer-body { box-shadow: 4px 0 16px rgba(0, 0, 0, .5); }
       }
     </style>
-  <link rel="modulepreload" href="/kgb-play/kgb-d2c10129654726ab.js" crossorigin="anonymous" integrity="sha384-+hH1iwpO/0q3SpJ/8Iec46hHxv4okR1z1snaouX85iCAIy6ruZWW/xr87vLRUHwH"><link rel="preload" href="/kgb-play/kgb-a84a589ff6cd9a5c_bg.wasm" crossorigin="anonymous" integrity="sha384-F+iHLnALilkK05SktTmqI89bED8BbPa0fg9mSd7C+vW1QBS+RwGkqqeV5jmR+TNh" as="fetch" type="application/wasm"></head>
+  <link rel="modulepreload" href="/kgb-play/kgb-9b97dd949d9eb102.js" crossorigin="anonymous" integrity="sha384-NAfFZkRwQgAUeSX35lFzDJJ8C48Wt6gruJ+nsPEAY66kEdkwshC2mcgXiR3APvIz"><link rel="preload" href="/kgb-play/kgb-bcbc106f47c627a4_bg.wasm" crossorigin="anonymous" integrity="sha384-ujdceOx42Rwi/j9S5arJIz+m4hGWFfrr9gKt3WYoyITq1xPT0FwqwafgVt0NlMYI" as="fetch" type="application/wasm"></head>
   <body>
     <div id="app">
       <aside id="drawer" aria-label="Launcher">
@@ -216,6 +218,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         <div id="btn-start"></div>
         <div id="btn-b"></div>
         <div id="btn-a"></div>
+        <div id="btn-rewind" aria-label="Rewind">&lt;&lt;</div>
       </div>
       <button id="menu-btn" type="button" aria-expanded="true" aria-controls="drawer-body" aria-label="Menu">&#9776;</button>
     </div>
